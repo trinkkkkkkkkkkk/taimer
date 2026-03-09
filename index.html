@@ -16,6 +16,24 @@ body{
   flex-direction:column;
   justify-content:center;
   align-items:center;
+  
+  .click-heart{
+position:fixed;
+font-size:22px;
+pointer-events:none;
+animation:popHeart 1s ease forwards;
+}
+
+@keyframes popHeart{
+0%{
+transform:scale(0.5);
+opacity:1;
+}
+100%{
+transform:translateY(-80px) scale(1.5);
+opacity:0;
+}
+}
 }
 
 h1{

@@ -16,24 +16,7 @@ body{
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  
-  .click-heart{
-position:fixed;
-font-size:22px;
-pointer-events:none;
-animation:popHeart 1s ease forwards;
-}
-
-@keyframes popHeart{
-0%{
-transform:scale(0.5);
-opacity:1;
-}
-100%{
-transform:translateY(-80px) scale(1.5);
-opacity:0;
-}
-}
+  overflow: hidden;
 }
 
 h1{
@@ -63,6 +46,45 @@ button{
   margin-top:20px;
   font-size:20px;
 }
+
+/* сердечки */
+.heart{
+  position:fixed;
+  width:12px;
+  height:12px;
+  background:red;
+  transform: rotate(45deg);
+  top:-20px;
+  pointer-events:none;
+  animation-name:fallHeart;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.heart::before,
+.heart::after{
+  content:"";
+  position:absolute;
+  width:12px;
+  height:12px;
+  background:red;
+  border-radius:50%;
+}
+
+.heart::before{
+  top:-6px;
+  left:0;
+}
+.heart::after{
+  top:0;
+  left:-6px;
+}
+
+@keyframes fallHeart{
+  0% { transform: translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity:0; }
+}
+
 </style>
 
 </head>
@@ -85,44 +107,34 @@ button{
 
 <script>
 
+/* Таймеры */
 const startDate = new Date("2025-12-17 00:00:00");
 const anniversary = new Date("2026-12-17 00:00:00");
 
 function updateTimers(){
+  const now = new Date();
 
-const now = new Date();
+  const diff = now - startDate;
+  const days = Math.floor(diff/(1000*60*60*24));
+  const hours = Math.floor((diff/(1000*60*60))%24);
+  const minutes = Math.floor((diff/(1000*60))%60);
+  const seconds = Math.floor((diff/1000)%60);
+  document.getElementById("timerTogether").innerHTML =
+    days+" дней "+hours+" часов "+minutes+" минут "+seconds+" секунд";
 
-/* время вместе */
-
-const diff = now - startDate;
-
-const days = Math.floor(diff/(1000*60*60*24));
-const hours = Math.floor((diff/(1000*60*60))%24);
-const minutes = Math.floor((diff/(1000*60))%60);
-const seconds = Math.floor((diff/1000)%60);
-
-document.getElementById("timerTogether").innerHTML =
-days+" дней "+hours+" часов "+minutes+" минут "+seconds+" секунд";
-
-/* до годовщины */
-
-const diff2 = anniversary - now;
-
-const d = Math.floor(diff2/(1000*60*60*24));
-const h = Math.floor((diff2/(1000*60*60))%24);
-const m = Math.floor((diff2/(1000*60))%60);
-const s = Math.floor((diff2/1000)%60);
-
-document.getElementById("timerAnniversary").innerHTML =
-d+" дней "+h+" часов "+m+" минут "+s+" секунд";
-
+  const diff2 = anniversary - now;
+  const d = Math.floor(diff2/(1000*60*60*24));
+  const h = Math.floor((diff2/(1000*60*60))%24);
+  const m = Math.floor((diff2/(1000*60))%60);
+  const s = Math.floor((diff2/1000)%60);
+  document.getElementById("timerAnniversary").innerHTML =
+    d+" дней "+h+" часов "+m+" минут "+s+" секунд";
 }
 
 setInterval(updateTimers,1000);
 updateTimers();
 
-/* сообщения */
-
+/* Сообщения */
 const messages=[
 "Я люблю тебя ❤️",
 "Ты моё счастье",
@@ -132,43 +144,53 @@ const messages=[
 ];
 
 function newMessage(){
-const msg=messages[Math.floor(Math.random()*messages.length)];
-document.getElementById("message").innerText=msg;
+  const msg=messages[Math.floor(Math.random()*messages.length)];
+  document.getElementById("message").innerText=msg;
 }
 
-/* тема */
-
+/* Тема */
+let darkTheme = false;
 function toggleTheme(){
-document.body.classList.toggle("dark");
+  darkTheme = !darkTheme;
+  document.body.classList.toggle("dark");
+
+  // обновляем цвет сердечек
+  document.querySelectorAll(".heart").forEach(h=>{
+    h.style.background = darkTheme ? "#ff69b4" : "red";
+    h.querySelectorAll(":before, :after").forEach(p=>{
+      p.style.background = darkTheme ? "#ff69b4" : "red";
+    });
+  });
 }
 
-/* конфетти */
-
+/* Конфетти */
 function confetti(){
-for(let i=0;i<40;i++){
-const el=document.createElement("div");
-el.style.position="fixed";
-el.style.left=Math.random()*100+"vw";
-el.style.top="-10px";
-el.style.width="8px";
-el.style.height="8px";
-el.style.background="white";
-el.style.animation="fall 3s linear";
-document.body.appendChild(el);
+  for(let i=0;i<40;i++){
+    const el=document.createElement("div");
+    el.style.position="fixed";
+    el.style.left=Math.random()*100+"vw";
+    el.style.top="-10px";
+    el.style.width="8px";
+    el.style.height="8px";
+    el.style.background="white";
+    el.style.animation="fall 3s linear";
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  }
+}
 
-setTimeout(()=>el.remove(),3000);
+/* Постоянные падающие сердечки */
+function createHearts(count=30){
+  for(let i=0;i<count;i++){
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.style.left = Math.random()*100 + "vw";
+    heart.style.animationDuration = (3 + Math.random()*5) + "s";
+    heart.style.background = darkTheme ? "#ff69b4" : "red";
+    document.body.appendChild(heart);
+  }
 }
-}
-
-const style=document.createElement("style");
-style.innerHTML=`
-@keyframes fall{
-to{
-transform:translateY(110vh) rotate(360deg);
-}
-}
-`;
-document.head.appendChild(style);
+createHearts(50);
 
 </script>
 
